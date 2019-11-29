@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: "kafka-security-poc"
+
+  profiles:
+    active: admin
+
+  kafka:
+    producer:
+      acks: "all"
+      retries: "3"
+      linger-ms: "2"
+    consumer:
+      auto-offset-reset: "earliest"
+      enable-auto-commit: "false"
+    topics:
+      sim-test1: "sim-poc-test1"
+    group-ids:
+      sim-test1: "sim-poc-test1-${spring.application.name}"
+
