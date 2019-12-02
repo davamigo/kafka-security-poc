@@ -2,9 +2,15 @@
 
 ## Configuration
 
+A **JKS certificate** must be used to connect to Apache Kafka with SSL protocol.
+The JKS certificate is a encrypted security file used to store a set of cryptographic keys or certificates in the binary **Java Key Store (JKS)** format.
+A JKS file contains sensitive data, so the file is encrypted and protected by a password to secure the file from unauthorized parties.
+
 ### Certificates
 
-You must add the JKS certificates to this folder: `<project-root>/src/main/resources/certs`
+You must add the **JKS certificates** to this folder:
+
+**`<project-root>/src/main/resources/certs`**
 
 - `client-keystore.jks`
 - `client-truststore.jks`
@@ -104,7 +110,7 @@ Examples:
 
 ### Quick test of certificates
 
-You can do a quick test of your JKS certificate files using docker image **[bitnami/kafka](https://hub.docker.com/r/bitnami/kafka)**, one of the most user Apache Kafka container images:
+You can do a quick test of your JKS certificate files using the docker image **[bitnami/kafka](https://hub.docker.com/r/bitnami/kafka)**, one of the most used *Apache Kafka* docker container images:
 
 - Go to the directory where the client keystore and truststore certificates are.
 
@@ -135,3 +141,6 @@ You can do a quick test of your JKS certificate files using docker image **[bitn
 ## Links
 * [Security at Kafka Documentation](https://kafka.apache.org/documentation/#security)
 * [Encryption and Authentication with SSL](https://docs.confluent.io/current/kafka/authentication_ssl.html)
+* [Enable SSL for Kafka Clients](https://docs.cloudera.com/HDPDocuments/HDP3/HDP-3.1.4/configuring-wire-encryption/content/enable_ssl_for_kafka_clients.html)
+* [Java KeyStore (JKS)](https://en.wikipedia.org/wiki/Java_KeyStore) - Wikipedia
+* [JKS File Extension](https://fileinfo.com/extension/jks)

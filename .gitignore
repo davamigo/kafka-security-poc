@@ -35,6 +35,6 @@ out/
 .DS_Store
 
 ### Project specific ###
-!.gitkeep
-/src/main/resources/certs/*
+/src/main/resources/certs/**
 /src/main/resources/application-*.yml
+!.gitkeep
