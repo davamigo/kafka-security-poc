@@ -1,6 +1,7 @@
 package com.privalia.poc.kafka.security.runner;
 
 import com.privalia.poc.kafka.security.producer.KafkaProducer;
+import com.privalia.poc.kafka.security.service.RandomTextGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +29,14 @@ public class KafkaSecurityCommandLineRunner implements CommandLineRunner {
     private static final String ARG_RUN_PRODUCER = "--produce";
     private static final String ARG_RUN_CONSUMER = "--consume";
 
+    /** Application context. Used to close the application */
+    private ConfigurableApplicationContext context;
+
     /** Service to publish to Kafka */
     private KafkaProducer kafkaProducer;
 
-    /** Application context. Used to close the application */
-    private ConfigurableApplicationContext context;
+    /** Random text generator */
+    private RandomTextGenerator textGenerator;
 
     /** Manager for the lifecycle of the listener containers */
     private KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
@@ -40,18 +44,21 @@ public class KafkaSecurityCommandLineRunner implements CommandLineRunner {
     /**
      * Constructor
      *
-     * @param kafkaProducer the service to publish to Kafka
      * @param context       the application context
+     * @param kafkaProducer the service to publish to Kafka
+     * @param textGenerator the text generator
      * @param kafkaListenerEndpointRegistry the manager for the lifecycle of the listener containers
      */
     @Autowired
     public KafkaSecurityCommandLineRunner(
-            KafkaProducer kafkaProducer,
             ConfigurableApplicationContext context,
+            KafkaProducer kafkaProducer,
+            RandomTextGenerator textGenerator,
             KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry
     ) {
-        this.kafkaProducer = kafkaProducer;
         this.context = context;
+        this.kafkaProducer = kafkaProducer;
+        this.textGenerator = textGenerator;
         this.kafkaListenerEndpointRegistry = kafkaListenerEndpointRegistry;
     }
 
@@ -93,7 +100,7 @@ public class KafkaSecurityCommandLineRunner implements CommandLineRunner {
 
         if (runProducer) {
             for (int num  = 0; num < messagesToProduce; num++) {
-                kafkaProducer.publish("Loren Ipsum " + num);
+                kafkaProducer.publish(textGenerator.getRandomText());
             }
         }
 
@@ -103,6 +110,10 @@ public class KafkaSecurityCommandLineRunner implements CommandLineRunner {
                 LOGGER.info(">>> Starting Kafka listener: {}", id);
                 kafkaListenerEndpointRegistry.getListenerContainer(id).start();
             });
+        }
+
+        if (!runProducer && !runConsumer) {
+            LOGGER.error(">>> Program argument required: [--produce [num]] [--consume]");
         }
     }
 
