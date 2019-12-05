@@ -13,8 +13,13 @@ spring:
     consumer:
       auto-offset-reset: "earliest"
       enable-auto-commit: "false"
+    streams:
+      threads: 1
+      auto-startup: false
+      replication-factor: 3
     topics:
       sim-test1: "sim-poc-test1"
+      sim-test2: "sim-poc-test2"
     group-ids:
       sim-test1: "sim-poc-test1-${spring.application.name}"
 

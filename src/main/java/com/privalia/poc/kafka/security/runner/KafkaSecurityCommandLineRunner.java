@@ -1,5 +1,6 @@
 package com.privalia.poc.kafka.security.runner;
 
+import com.privalia.poc.kafka.security.monitor.KafkaStreamProcessesStatusMonitor;
 import com.privalia.poc.kafka.security.producer.KafkaProducer;
 import com.privalia.poc.kafka.security.service.RandomTextGenerator;
 import org.slf4j.Logger;
@@ -28,18 +29,22 @@ public class KafkaSecurityCommandLineRunner implements CommandLineRunner {
     /** Command line argument */
     private static final String ARG_RUN_PRODUCER = "--produce";
     private static final String ARG_RUN_CONSUMER = "--consume";
+    private static final String ARG_RUN_STREAM = "--stream";
 
     /** Application context. Used to close the application */
-    private ConfigurableApplicationContext context;
+    private final ConfigurableApplicationContext context;
 
     /** Service to publish to Kafka */
-    private KafkaProducer kafkaProducer;
+    private final KafkaProducer kafkaProducer;
 
     /** Random text generator */
-    private RandomTextGenerator textGenerator;
+    private final RandomTextGenerator textGenerator;
 
     /** Manager for the lifecycle of the listener containers */
-    private KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
+    private final KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
+
+    /** The status monitor for the Kafka Stream processes */
+    private final KafkaStreamProcessesStatusMonitor kafkaStreamProcessesStatusMonitor;
 
     /**
      * Constructor
@@ -54,12 +59,14 @@ public class KafkaSecurityCommandLineRunner implements CommandLineRunner {
             ConfigurableApplicationContext context,
             KafkaProducer kafkaProducer,
             RandomTextGenerator textGenerator,
-            KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry
+            KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry,
+            KafkaStreamProcessesStatusMonitor kafkaStreamProcessesStatusMonitor
     ) {
         this.context = context;
         this.kafkaProducer = kafkaProducer;
         this.textGenerator = textGenerator;
         this.kafkaListenerEndpointRegistry = kafkaListenerEndpointRegistry;
+        this.kafkaStreamProcessesStatusMonitor = kafkaStreamProcessesStatusMonitor;
     }
 
     /**
@@ -73,6 +80,7 @@ public class KafkaSecurityCommandLineRunner implements CommandLineRunner {
 
         boolean runProducer = false;
         boolean runConsumer = false;
+        boolean runStreamer = false;
         String lastArg = "";
         int messagesToProduce = 1;
 
@@ -83,9 +91,15 @@ public class KafkaSecurityCommandLineRunner implements CommandLineRunner {
                 case ARG_RUN_PRODUCER:
                     runProducer = true;
                     break;
+
                 case ARG_RUN_CONSUMER:
                     runConsumer = true;
                     break;
+
+                case ARG_RUN_STREAM:
+                    runStreamer = true;
+                    break;
+
                 default:
                     if (ARG_RUN_PRODUCER.equals(lastArg)) {
                         try {
@@ -112,8 +126,19 @@ public class KafkaSecurityCommandLineRunner implements CommandLineRunner {
             });
         }
 
-        if (!runProducer && !runConsumer) {
-            LOGGER.error(">>> Program argument required: [--produce [num]] [--consume]");
+        if (runStreamer) {
+            kafkaStreamProcessesStatusMonitor.getBeanQualifiers().forEach(qualifier -> {
+                LOGGER.info(">>> Starting Kafka Streams: {}", qualifier);
+                try {
+                    kafkaStreamProcessesStatusMonitor.start(qualifier);
+                } catch (KafkaStreamProcessesStatusMonitor.BeanNotFoundException exc) {
+                    exc.printStackTrace();
+                }
+            });
+        }
+
+        if (!runProducer && !runConsumer && !runStreamer) {
+            LOGGER.error(">>> Program argument required: [--produce [num]] [--consume] [--stream]");
         }
     }
 
