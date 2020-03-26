@@ -1,5 +1,12 @@
 # Kafka Security PoC
 
+This **Proof of Concept** (PoC) is used to test a **Kafka cluster** with **Kafka Security enabled** using JKS certificates.
+It should be run from the command line (see [below](#Run the project)).
+It can be used to test:
+* Producing messages.
+* Consuming messages.
+* Kafka Streams (word count).
+
 ## Configuration
 
 A **JKS certificate** must be used to connect to Apache Kafka with SSL protocol.
@@ -65,16 +72,19 @@ $ ./gradlew build
 $ ./gradlew bootRun [--args='<arguments>']
 ```
 
+### Program arguments
+
 The valid program arguments are:
 
 - `--produce [num]` - Produces one or more messages to Kafka. `num` is optional and its default value is `1`.
 - `--consume` - Starts the consumer. The programs doesn't end until the user press `Ctrl+C`.
+- `--stream` - Starts the stream process. The programs doesn't end until the user press `Ctrl+C`.
 - `--spring.profiles.active=<profile>` - To choose a different profile.
 
 By default the program does nothing. You must set `--produce` or `--consume`.
 And you can set both.
 
-Examples:
+### Examples
 
 - Produce 1 message and exit:
     ```bash
@@ -91,6 +101,11 @@ Examples:
     $ ./gradlew bootRun --args='--consume'
     ```
 
+- Start the stream program:
+    ```bash
+    $ ./gradlew bootRun --args='--stream'
+    ```
+
 - Produce one message and start the consumer:
     ```bash
     $ ./gradlew bootRun --args='--produce --consume'
@@ -105,6 +120,20 @@ Examples:
     ```bash
     $ ./gradlew bootRun --args='--spring.profiles.active=consumer --consume'
     ```
+
+### Profile examples
+
+The profiles are used to test different certificate configurations and check for example the producer is not able to publish without publishing rights.
+
+* `admin` - all rights: produce, consume an admin (default profile).
+* `producer` - rights to produce only.
+* `consumer` - rights to consume only.
+
+### Topics
+
+* `sim-poc-test1` - used by the producer to publish and by the consumer and the streamer to read.
+* `sim-poc-test2` - used by the streamer to write the results (word count).
+
 
 ## Annexes
 
